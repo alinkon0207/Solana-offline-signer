@@ -7,7 +7,7 @@ export default {
 	},
 	data: () => {
 		return {
-			appTheme: localStorage.getItem('theme'),
+			appTheme: 'dark',
 		};
 	},
 };
@@ -34,17 +34,6 @@ export default {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-align: center;
-}
-
-.vue-back-to-top {
-	@apply p-2 bg-indigo-500 hover:bg-indigo-600 text-white transition
-        duration-500
-        ease-in-out
-        transform
-        hover:-translate-y-1 hover:scale-110;
-	border-radius: 50%;
-	font-size: 22px;
-	line-height: 22px;
 }
 
 .fade-enter-active {

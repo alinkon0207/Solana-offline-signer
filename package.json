@@ -10,26 +10,15 @@
   "dependencies": {
     "@solana/web3.js": "^1.78.3",
     "@tailwindcss/forms": "^0.5.3",
-    "@vue/cli-plugin-babel": "^5.0.8",
-    "@vue/cli-plugin-eslint": "^5.0.8",
-    "@vue/cli-plugin-router": "^5.0.8",
-    "bip32": "^4.0.0",
     "bip39": "^3.1.0",
     "bs58": "^5.0.0",
-    "core-js": "^3.27.2",
     "ed25519-hd-key": "^1.3.0",
     "node-polyfill-webpack-plugin": "^2.0.1",
-    "postcss-flexbugs-fixes": "^5.0.2",
-    "postcss-import": "^15.1.0",
-    "postcss-preset-env": "^7.8.3",
     "qrcode.vue": "^3.4.1",
-    "regenerator-runtime": "^0.13.11",
-    "stream-browserify": "^3.0.0",
     "tweetnacl": "^1.0.3",
     "vue": "^3.2.45",
-    "vue-backtotop": "^1.6.1",
-    "vue-router": "^4.1.6",
-    "vue3-autocounter": "^1.0.6"
+    "vue-router": "^4.2.4",
+    "vue3-toastify": "^0.1.12"
   },
   "devDependencies": {
     "@vue/cli-service": "~5.0.8",

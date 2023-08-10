@@ -19,27 +19,52 @@ export default {
 			destinationAddress: localStorage.getItem('DestinationAddress') == undefined ? '' : localStorage.getItem('DestinationAddress'),
 			amount: localStorage.getItem('Amount') == undefined ? '' : localStorage.getItem('Amount'),
 			URLtoBroadcast: localStorage.getItem('EndPointUrl') == undefined ? '' : localStorage.getItem('EndPointUrl'),
-			IsBroadcasted: false,
 			broadcastAction: '',
 		}
 	},
 	methods: {
+		proc() {
+			try {
+				const rawTransaction = web3.Transaction.from(Buffer.from(this.signedTx, 'base64'));
+				console.log(rawTransaction);
+				rawTransaction.instructions.forEach((instruction) => {
+					if (instruction.programId.equals(web3.SystemProgram.programId)) {
+						const systemInstruction = web3.SystemInstruction.decodeInstructionType(instruction);
+						console.log('System Instruction:', systemInstruction);
+						if (systemInstruction == 'Transfer'){
+							const t = web3.SystemInstruction.decodeTransfer(instruction)
+							this.destinationAddress = t.toPubkey.toBase58();
+							this.amount = ''+  t.lamports;
+						}
+					}
+				});
+			} catch (e) {
+				this.destinationAddress = '';
+				this.amount = '';
+				console.log(e);
+			}
+		},
+		setSignedTx(event) {
+			this.signedTx = event.target.value;
+			this.proc();
+		},
 		async broadcast() {
-			// Add web3
 			const connection = new web3.Connection(this.URLtoBroadcast);
 
 			// Send Transaction
 			try {
-				const txhash = await connection.sendRawTransaction(Buffer.from(this.signedTx, 'base64'));
+				const response = await connection.sendRawTransaction(Buffer.from(this.signedTx, 'base64'));
 
-				console.log(txhash);
-
-				this.IsBroadcasted = true;
-				this.broadcastAction = txhash;
+				console.log(response);
+				this.broadcastAction = response;
 			} catch (e) {
 				console.log(e);
+				this.broadcastAction = e;
 			}
 		}
+	},
+	mounted() {
+		this.proc();
 	}
 };
 </script>
@@ -47,7 +72,8 @@ export default {
 <template>
 	<div class="w-full">
 		<div class="leading-loose p-7 bg-secondary-light dark:bg-secondary-dark rounded-xl shadow-xl text-left">
-			<FormTextarea label="Signed Transaction" textareaIdentifier="Signed Transaction" :value="signedTx" readonly />
+			<FormTextarea label="Signed Transaction" textareaIdentifier="Signed Transaction" :value="signedTx"
+				@input="event => setSignedTx(event)" />
 			<FormInput label="Destination Address" inputIdentifier="Destination Address" :val="destinationAddress"
 				placeholder="Unknown" readonly />
 			<FormInput label="Amount (Lamports)" inputIdentifier="" :val="amount" placeholder="Type the amount" readonly />
@@ -71,11 +97,8 @@ export default {
 				<h1>Recent Broadcasted Transactions:</h1>
 			</div>
 
-			<div class="text-white" v-if="IsBroadcasted == true">
+			<div class="text-white">
 				{{ broadcastAction }}
-			</div>
-			<div class="text-white" v-else>
-				No recent broadcasted transactions found.
 			</div>
 		</div>
 	</div>

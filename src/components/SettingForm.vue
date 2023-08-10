@@ -14,6 +14,9 @@ export default {
 			endpointUrl: localStorage.getItem('EndPointUrl') == undefined ? '' : localStorage.getItem('EndPointUrl'),
 			IsRequested: false,
 			recentBlockhash: '',
+			minFeeExemptAmount: '',
+			nonceAccount: null,
+			nonceAccountAddress: localStorage.getItem('NonceAccountAddress') == undefined ? '' : localStorage.getItem('NonceAccountAddress'),
 			nodes: [
 				{
 					url: 'https://api.devnet.solana.com'	// testnet
@@ -42,7 +45,6 @@ export default {
 			localStorage.setItem('EndPointUrl', this.endpointUrl);
 		},
 		async getRecentBlockhash() {
-			// Add web3
 			try {
 				const connection = new web3.Connection(this.endpointUrl);
 
@@ -56,6 +58,31 @@ export default {
 			} catch (e) {
 				console.log(e);
 			}
+		},
+		async getNonceAccount() {
+			try {
+				const connection = new web3.Connection(this.endpointUrl);
+				const accountInfo = await connection.getAccountInfo(new web3.PublicKey(this.nonceAccountAddress));
+				this.nonceAccount = web3.NonceAccount.fromAccountData(accountInfo.data);
+
+				console.log(`auth: ${this.nonceAccount.authorizedPubkey.toBase58()}`)
+				console.log(`nonce: ${this.nonceAccount.nonce}`)
+				console.log(`fee calculator: ${this.nonceAccount.feeCalculator}`)
+
+				const nextNonce = this.nonceAccount.nonce;
+				localStorage.setItem('NextAccountNonce', nextNonce);
+			} catch (e) {
+				console.log(e);
+			}
+		},
+		async getRentExempt() {
+			try {
+				const connection = new web3.Connection(this.endpointUrl);
+				this.minFeeExemptAmount = await connection.getMinimumBalanceForRentExemption(web3.NONCE_ACCOUNT_LENGTH)
+				localStorage.setItem('MinFeeExemptAmount', this.minFeeExemptAmount);
+			} catch (e) {
+				console.log(e);
+			}
 		}
 	},
 };
@@ -64,7 +91,8 @@ export default {
 <template>
 	<div class="w-full">
 		<div class="leading-loose p-7 bg-secondary-light dark:bg-secondary-dark rounded-xl shadow-xl text-left">
-			<FormInput label="Solana Endpoint URL" inputIdentifier="URL" :val="endpointUrl" readonly />
+			<FormInput label="Solana Endpoint URL" inputIdentifier="URL" :val="endpointUrl"
+				@input="event => setNode(event.target.value)" />
 			<div class="text-white">
 				No trailing slash "/". eg: http://localhost:8899
 			</div>
@@ -96,6 +124,33 @@ export default {
 				</div>
 				<div v-else>
 					None
+				</div>
+			</div>
+
+			<!-- Get Nonce Account-->
+			<div class="flex justify-center mt-10">
+				<Button title="Get Nonce Account"
+					class="px-4 py-2.5 text-white tracking-wider bg-indigo-500 hover:bg-indigo-600 focus:ring-1 focus:ring-indigo-900 rounded-lg duration-500"
+					type="button" aria-label="Get Nonce Account" @click="getNonceAccount" />
+			</div>
+			<div class="text-white">
+				Nonce Account for {{ nonceAccountAddress }}:
+				<div>
+					{{ nonceAccount }}
+				</div>
+			</div>
+
+
+			<!-- Get Rent Exemption Min Amount-->
+			<div class="flex justify-center mt-10">
+				<Button title="Get Min Rent Exempt Amount"
+					class="px-4 py-2.5 text-white tracking-wider bg-indigo-500 hover:bg-indigo-600 focus:ring-1 focus:ring-indigo-900 rounded-lg duration-500"
+					type="button" aria-label="Get Min Rent Exempt Amount" @click="getRentExempt" />
+			</div>
+			<div class="text-white">
+				Min Rent Exempt Amount:
+				<div>
+					{{ minFeeExemptAmount }} lamports ({{ minFeeExemptAmount / (10 ** 9) }} SOL)
 				</div>
 			</div>
 		</div>

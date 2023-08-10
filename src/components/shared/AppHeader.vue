@@ -1,10 +1,8 @@
 <script>
-import ThemeSwitcher from '../ThemeSwitcher';
 import AppHeaderLinks from './AppHeaderLinks.vue';
 
 export default {
 	components: {
-		ThemeSwitcher,
 		AppHeaderLinks,
 	},
 	data() {
